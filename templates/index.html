@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MNIST Training Monitor</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .chart {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>MNIST CNN Training Progress</h1>
+      <div id="lossChart" class="chart"></div>
+      <div id="accuracyChart" class="chart"></div>
+    </div>
+
+    <script>
+      function updateCharts() {
+        fetch("/get_logs")
+          .then((response) => response.json())
+          .then((data) => {
+            const epochs = data.map((log) => log.epoch);
+            const losses = data.map((log) => log.loss);
+            const accuracies = data.map((log) => log.accuracy);
+
+            // Loss chart
+            const lossTrace = {
+              x: epochs,
+              y: losses,
+              mode: "lines",
+              name: "Training Loss",
+            };
+
+            const lossLayout = {
+              title: "Training Loss",
+              xaxis: { title: "Epoch" },
+              yaxis: { title: "Loss" },
+            };
+
+            Plotly.newPlot("lossChart", [lossTrace], lossLayout);
+
+            // Accuracy chart
+            const accuracyTrace = {
+              x: epochs,
+              y: accuracies,
+              mode: "lines",
+              name: "Training Accuracy",
+            };
+
+            const accuracyLayout = {
+              title: "Training Accuracy",
+              xaxis: { title: "Epoch" },
+              yaxis: {
+                title: "Accuracy (%)",
+                range: [90, 100], // Set y-axis range from 90% to 100%
+              },
+            };
+
+            Plotly.newPlot("accuracyChart", [accuracyTrace], accuracyLayout);
+          });
+      }
+
+      // Update charts every second
+      setInterval(updateCharts, 1000);
+    </script>
+  </body>
+</html>
